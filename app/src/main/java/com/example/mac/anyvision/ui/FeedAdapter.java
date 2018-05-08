@@ -3,18 +3,26 @@ package com.example.mac.anyvision.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.widget.CardView;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.OvershootInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.mac.anyvision.R;
 import com.example.mac.anyvision.model.FeedItem;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import at.blogc.android.views.ExpandableTextView;
 
 /**
  *
@@ -36,19 +44,32 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder,final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
+        final ViewGroup.LayoutParams params = holder.feedLayout.getLayoutParams();
         final FeedItem item = items.get(position);
         holder.title.setText(item.getTitle());
-        holder.date.setText(item.getDate());
-        holder.desc.setText(item.getDescription());
-//        Glide.with(context)
-//                .load(item.getImageFeed().getImage())
-//                .asBitmap()
-//                .fitCenter()
-//               // .placeholder(R.drawable.movie_icon_96)
-//                .into(holder.image);
+        holder.date.setText(String.format("Date: %s", item.getDate()));
+        holder.desc.setText(Html.fromHtml(item.getDescription()));
+        holder.desc.setMovementMethod(new ScrollingMovementMethod());
+        // set animation duration via code, but preferable in your layout files by using the animation_duration attribute
+        holder.desc.setAnimationDuration(750L);
+        // set interpolators for both expanding and collapsing animations
+        holder.desc.setInterpolator(new OvershootInterpolator());
+        holder.buttonToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                holder.buttonToggle.setText(holder.desc.isExpanded() ? R.string.expand : R.string.collapse);
+                holder.desc.toggle();
+                params.height = holder.desc.isExpanded() ? 400 : 1200;
+                holder.feedLayout.setLayoutParams(params);
+            }
+        });
 
-        holder.card.setOnClickListener(new View.OnClickListener() {
+        Picasso.with(context)
+                .load(item.getEnclosure().getImage())
+                .into(holder.image);
+
+        holder.feedLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String url = item.getLink();
@@ -61,25 +82,27 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return items != null ? items.size() : 0;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        public CardView card;
-        public TextView title,date,desc;
+        public LinearLayout feedLayout;
+        public TextView title, date;
+        public ExpandableTextView desc;
+        public Button buttonToggle;
         public ImageView image;
 
         public ViewHolder(View v) {
             super(v);
-            card =  v.findViewById(R.id.card_feed);
+            feedLayout = v.findViewById(R.id.feed_layout);
             title = v.findViewById(R.id.tv_title);
             date = v.findViewById(R.id.tv_date);
-            desc = v.findViewById(R.id.tv_desc);
+            desc = v.findViewById(R.id.expandableTextView);
+            buttonToggle = v.findViewById(R.id.button_toggle);
             image = v.findViewById(R.id.iv_image);
 
         }
-
 
     }
 }

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AnyVision</string>
+    <string name="expand">Show more</string>
+    <string name="collapse">Show less</string>
 </resources>

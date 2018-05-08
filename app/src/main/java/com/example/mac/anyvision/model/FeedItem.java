@@ -14,8 +14,8 @@ public class FeedItem {
     private String date;
     @Element(name = "description")
     private String description;
-    @Element(required = false)
-    private ImageFeed enclosure;
+    @Element(name = "enclosure")
+    private ImageFeed image;
 
     public FeedItem() { }
 
@@ -53,10 +53,10 @@ public class FeedItem {
     }
 
     public ImageFeed getEnclosure() {
-        return enclosure;
+        return image;
     }
 
     public void setEnclosure(ImageFeed enclosure) {
-        this.enclosure = enclosure;
+        this.image = enclosure;
     }
 }
